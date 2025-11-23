@@ -1,7 +1,7 @@
 import { prisma } from "@/common/prisima";
 import { BusinessError, UserExistsError } from "../../common/errors";
 import { hashPassword } from "../../utils/password";
-import { flattenRelation } from "../../utils/prisma";
+import { flattenRelation, paginate } from "../../utils/prisma";
 import type { UserModel } from "./model";
 
 export const getUserByUsername = async (username: string) => {
@@ -14,39 +14,44 @@ export const getUserByUsername = async (username: string) => {
 };
 
 export const getUsers = async (query: UserModel.userListQuery) => {
-  const { page = 1, pageSize = 10, username } = query;
-  console.log(query);
-  const users = await prisma.user.findMany({
-    where: {
-      username: {
-        contains: username,
-      },
-    },
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-    include: {
-      userRole: {
-        select: {
-          role: {
-            select: {
-              id: true,
-              name: true,
-              description: true,
+  const { page, pageSize, username } = query;
+
+  const result = await paginate(
+    prisma.user,
+    { page, pageSize },
+    {
+      where: username
+        ? {
+            username: {
+              contains: username,
+            },
+          }
+        : undefined,
+      include: {
+        userRole: {
+          select: {
+            role: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+              },
             },
           },
         },
       },
-    },
-  });
-  const finalUsers = users.map((user) => {
-    const { userRole, ...userData } = user;
-    return {
-      ...userData,
-      role: userRole?.role,
-    };
-  });
-  console.log(finalUsers);
-  return finalUsers;
+    }
+  );
+
+  // 将 userRole.role 提升到第一层为 role
+  const finalUsers = result.list
+    .map((user) => flattenRelation(user, ["userRole", "role"], "role"))
+    .filter((user): user is NonNullable<typeof user> => user !== null);
+
+  return {
+    ...result,
+    list: finalUsers,
+  };
 };
 
 export const createUser = async (data: UserModel.userCreateBody) => {

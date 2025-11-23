@@ -45,3 +45,20 @@ export const responseSchema = <T extends TSchema>(schema?: T) => {
       })
     : t.Object(baseResponseSchema);
 };
+
+export const paginationResponseSchema = <T extends TSchema>(schema: T) => {
+  return responseSchema(
+    t.Object({
+      list: t.Array(schema),
+      total: t.Number({
+        description: "总条数",
+      }),
+      page: t.Number({
+        description: "页码",
+      }),
+      pageSize: t.Number({
+        description: "每页条数",
+      }),
+    })
+  );
+};

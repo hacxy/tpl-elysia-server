@@ -1,5 +1,9 @@
 import { Elysia, t } from "elysia";
-import { response, responseSchema } from "../../utils/response";
+import {
+  paginationResponseSchema,
+  response,
+  responseSchema,
+} from "../../utils/response";
 import { requiredAuth } from "../../plugins/jwt";
 import { createUser, getUsers } from "./service";
 import { UserPlain } from "../../generated/prismabox/User";
@@ -23,12 +27,11 @@ user.get(
   },
   {
     query: UserModel.userListQuery,
-
     detail: {
       summary: "用户列表",
       description: "获取所有用户列表",
     },
-    response: responseSchema(t.Array(ProfileModel.updateUserResponse)),
+    response: paginationResponseSchema(ProfileModel.updateUserResponse),
   }
 );
 
