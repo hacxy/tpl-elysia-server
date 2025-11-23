@@ -1,4 +1,4 @@
-import { Elysia, file } from "elysia";
+import { Elysia } from "elysia";
 import user from "./modules/user";
 import auth from "./modules/auth";
 import { ip } from "elysia-ip";
@@ -20,6 +20,8 @@ function ensurePublicDir(): void {
   const publicDir = process.env.PUBLIC_DIR || "public";
 
   const absolutePath = join(process.cwd(), publicDir);
+
+  console.log(publicDir);
 
   if (!existsSync(absolutePath)) {
     try {
