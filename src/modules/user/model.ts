@@ -48,7 +48,7 @@ export namespace UserModel {
   export const userListQuery = paginationQuerySchema({
     username: t.Optional(
       t.String({
-        examples: "admin123",
+        examples: ["admin123"],
         description: "用户名",
       })
     ),

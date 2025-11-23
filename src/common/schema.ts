@@ -5,7 +5,7 @@ import type { TSchema, TObject, TProperties } from "@sinclair/typebox";
 const basePaginationFields = {
   page: t.Optional(
     t.Number({
-      examples: 1,
+      examples: [1],
       default: 1,
       description: "页码",
     })

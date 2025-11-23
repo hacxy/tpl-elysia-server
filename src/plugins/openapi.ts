@@ -7,6 +7,9 @@ export const openapiPlugin = (app: Elysia) => {
       scalar: {
         cdn: "https://unpkg.com/@scalar/api-reference@latest/dist/browser/standalone.js",
       },
+      exclude: {
+        paths: ["/public/*"],
+      },
       documentation: {
         components: {
           securitySchemes: {

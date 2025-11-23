@@ -11,6 +11,7 @@ import { nullFilterPlugin } from "./plugins/null-filter";
 import staticPlugin from "@elysiajs/static";
 import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
+import upload from "./modules/upload";
 
 /**
  * 确保 PUBLIC_DIR 路径存在
@@ -49,6 +50,6 @@ export const app = new Elysia({ name: "elysia-example" })
   .use(errorHandlerPlugin) // 错误处理
   .use(nullFilterPlugin); // 过滤 null 值
 
-app.use(user).use(auth).use(profile);
+app.use(user).use(auth).use(profile).use(upload);
 
 app.listen(1118);
