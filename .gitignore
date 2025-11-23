@@ -46,3 +46,4 @@ dist
 logs/
 .env
 /src/generated
+public/

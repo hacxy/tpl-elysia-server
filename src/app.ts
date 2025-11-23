@@ -17,10 +17,7 @@ export const app = new Elysia({ name: "elysia-example" })
   .use(logPlugin)
   .use(openapiPlugin)
   .use(errorHandlerPlugin) // 错误处理
-  .use(nullFilterPlugin)
-  .get("/openapi/standalone.min.js", () =>
-    file("./public/openapi/standalone.min.js")
-  ); // 过滤 null 值
+  .use(nullFilterPlugin); // 过滤 null 值
 
 app.use(user).use(auth).use(profile);
 
