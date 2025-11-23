@@ -4,6 +4,9 @@ import Elysia from "elysia";
 export const openapiPlugin = (app: Elysia) => {
   return app.use(
     openapi({
+      scalar: {
+        cdn: "/openapi/standalone.min.js",
+      },
       documentation: {
         components: {
           securitySchemes: {
