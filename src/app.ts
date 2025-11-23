@@ -21,7 +21,7 @@ function ensurePublicDir(): void {
 
   const absolutePath = join(process.cwd(), publicDir);
 
-  console.log(publicDir);
+  console.log(absolutePath);
 
   if (!existsSync(absolutePath)) {
     try {
