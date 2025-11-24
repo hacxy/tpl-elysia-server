@@ -4,6 +4,7 @@ import path from "node:path";
 import { response, responseSchema } from "@/utils/response";
 import { BusinessError, ValidationError } from "../../common/errors";
 import { ensureUploadDir, generateUniqueFileName } from "../../utils/upload";
+import { requiredAuth } from "../../plugins/jwt";
 
 const upload = new Elysia({
   prefix: "upload",
@@ -12,12 +13,23 @@ const upload = new Elysia({
     summary: "上传文件相关接口",
     description: "上传文件相关接口示例",
   },
-});
+}).use(requiredAuth);
 
 upload.post(
   "/static",
   async ({ body, request }) => {
-    const { file } = body as UploadModel.uploadFileSchema;
+    const { file, multipleFiles } = body as UploadModel.uploadFileSchema;
+
+    if (!(file instanceof File)) {
+      throw new ValidationError("文件类型错误");
+    }
+    if (multipleFiles) {
+      for (const file of multipleFiles) {
+        if (!(file instanceof File)) {
+          throw new ValidationError("文件类型错误");
+        }
+      }
+    }
 
     if (!file) {
       throw new ValidationError("文件不能为空");
