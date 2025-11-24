@@ -1,6 +1,9 @@
 import Elysia, { t } from "elysia";
-import { requiredAuth } from "../../plugins/jwt";
-import { withHeaders } from "@elysiajs/openapi";
+import { UploadModel } from "./model";
+import path from "node:path";
+import { response, responseSchema } from "@/utils/response";
+import { BusinessError, ValidationError } from "../../common/errors";
+import { ensureUploadDir, generateUniqueFileName } from "../../utils/upload";
 
 const upload = new Elysia({
   prefix: "upload",
@@ -13,9 +16,41 @@ const upload = new Elysia({
 
 upload.post(
   "/static",
-  ({ body }) => {
-    const { file } = body as { file: File };
-    console.log(file);
+  async ({ body, request }) => {
+    const { file } = body as UploadModel.uploadFileSchema;
+
+    if (!file) {
+      throw new ValidationError("文件不能为空");
+    }
+
+    // 确保上传目录存在
+    const uploadsDir = ensureUploadDir();
+
+    // 生成唯一文件名
+    const uniqueFileName = generateUniqueFileName(file.name);
+    const filePath = path.join(uploadsDir, uniqueFileName);
+    const publicDir = process.env.PUBLIC_DIR || "public";
+    const finalPublicDir = publicDir.startsWith("/")
+      ? publicDir.slice(1)
+      : publicDir;
+    try {
+      // 保存文件
+      await Bun.write(filePath, file);
+
+      // 构建完整的文件URL
+      const requestUrl = new URL(request.url);
+      const fileUrl = `${requestUrl.origin}/${finalPublicDir}/uploads/${uniqueFileName}`;
+
+      return response.success({
+        originName: file.name,
+        url: fileUrl,
+      });
+    } catch (error) {
+      throw new BusinessError(
+        500,
+        `文件保存失败: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   },
   {
     detail: {
@@ -24,16 +59,17 @@ upload.post(
       requestBody: {
         content: {
           "multipart/form-data": {
-            schema: t.Object({
-              file: t.File({
-                description: "需要上传的文件",
-                format: "image/*",
-              }),
-            }),
+            schema: UploadModel.uploadFileSchema,
           },
         },
       },
     },
+    response: responseSchema(
+      t.Object({
+        originName: t.String({ description: "原始文件名" }),
+        url: t.String({ description: "文件URL" }),
+      })
+    ),
   }
 );
 
