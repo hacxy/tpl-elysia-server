@@ -29,6 +29,10 @@ export const openapiPlugin = (app: Elysia) => {
             name: "用户",
             description: "用户相关接口",
           },
+          {
+            name: "AI",
+            description: "AI相关接口",
+          },
         ],
         info: {
           title: "Elysia example API",

@@ -9,6 +9,7 @@ import { errorHandlerPlugin } from "./plugins/error";
 import { openapiPlugin } from "./plugins/openapi";
 import { nullFilterPlugin } from "./plugins/null-filter";
 import upload from "./modules/upload";
+import ai from "./modules/ai";
 
 export const app = new Elysia({ name: "elysia-example" })
   .use(ip())
@@ -18,6 +19,6 @@ export const app = new Elysia({ name: "elysia-example" })
   .use(errorHandlerPlugin) // 错误处理
   .use(nullFilterPlugin); // 过滤 null 值
 
-app.use(user).use(auth).use(profile).use(upload);
+app.use(user).use(auth).use(profile).use(upload).use(ai);
 
 app.listen(1118);

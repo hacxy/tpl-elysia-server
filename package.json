@@ -15,12 +15,14 @@
     "prisma:reset": "bunx prisma migrate reset"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.71",
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/openapi": "^1.4.11",
     "@elysiajs/static": "^1.4.7",
     "@prisma/adapter-mariadb": "^6.19.0",
     "@prisma/client": "^6.19.0",
+    "ai": "^5.0.101",
     "cos-nodejs-sdk-v5": "^2.15.4",
     "elysia": "latest",
     "elysia-http-exception": "^0.1.5",
