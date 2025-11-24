@@ -43,6 +43,7 @@ export const app = new Elysia({ name: "elysia-example" })
   .use(
     staticPlugin({
       assets: process.env.PUBLIC_DIR,
+      prefix: "/public",
     })
   )
   .use(logPlugin)

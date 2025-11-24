@@ -41,18 +41,13 @@ upload.post(
     // 生成唯一文件名
     const uniqueFileName = generateUniqueFileName(file.name);
     const filePath = path.join(uploadsDir, uniqueFileName);
-    const publicDir = process.env.PUBLIC_DIR || "public";
-    const finalPublicDir = publicDir.startsWith("/")
-      ? publicDir.slice(1)
-      : publicDir;
     try {
       // 保存文件
       await Bun.write(filePath, file);
 
       // 构建完整的文件URL
       const requestUrl = new URL(request.url);
-      const fileUrl = `${requestUrl.origin}/${finalPublicDir}/uploads/${uniqueFileName}`;
-
+      const fileUrl = `${requestUrl.protocol}//${requestUrl.host}/public/uploads/${uniqueFileName}`;
       return response.success({
         originName: file.name,
         url: fileUrl,
