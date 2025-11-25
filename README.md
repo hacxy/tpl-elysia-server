@@ -22,7 +22,7 @@ ElysiaJS 服务端开发示例
 
 ## 安装 Bun
 
-- 已安装可忽略
+- 已安装可跳过
 
 ```sh
 curl -fsSL https://bun.sh/install | bash
