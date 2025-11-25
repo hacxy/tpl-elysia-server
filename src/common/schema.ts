@@ -1,6 +1,6 @@
 // 公共分页的schema
 import { t } from "elysia";
-import type { TSchema, TObject, TProperties } from "@sinclair/typebox";
+import type { TObject, TProperties } from "@sinclair/typebox";
 
 const basePaginationFields = {
   page: t.Optional(
