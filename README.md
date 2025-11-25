@@ -1,6 +1,6 @@
 # Elisya Example
 
-ElysiaJS 使用案例
+ElysiaJS 服务端开发示例
 
 文档： https://elysiajs.com/
 
