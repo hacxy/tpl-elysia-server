@@ -46,4 +46,4 @@ dist
 logs/
 .env
 /src/generated
-public/
+public/dev.db
