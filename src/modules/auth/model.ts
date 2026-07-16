@@ -1,17 +1,10 @@
 import { t } from "elysia";
-import { UserModel } from "../user/model";
-import { throwValidationError } from "../../common/errors";
 
 export namespace AuthModel {
-  export const AccountBody = t.Object(
-    {
-      username: UserModel.usernameSchema,
-      password: UserModel.passwordSchema,
-    },
-    {
-      error: throwValidationError(),
-    }
-  );
+  export const AccountBody = t.Object({
+    username: t.String({ minLength: 3, maxLength: 20 }),
+    password: t.String({ minLength: 6, maxLength: 50 }),
+  });
 
   export const signInResponse = t.Object({
     token: t.String({

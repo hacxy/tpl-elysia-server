@@ -1,17 +1,8 @@
 import { PrismaClient } from "@/generated/prisma/client";
-import mariadbAdapter from "../../prisma/adapter";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 
-export const prisma = new PrismaClient({ adapter: mariadbAdapter });
+const adapter = new PrismaLibSql({
+  url: process.env.DATABASE_URL || "file:./dev.db",
+});
 
-// export const prisma = basePrisma.$extends({
-//   query: {
-//     $allModels: {
-//       $allOperations: async ({ args, query }) => {
-//         try {
-//           return await query(args);
-//         } catch (error) {
-//         }
-//       },
-//     },
-//   },
-// });
+export const prisma = new PrismaClient({ adapter });

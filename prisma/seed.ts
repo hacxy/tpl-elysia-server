@@ -1,132 +1,34 @@
 import { PrismaClient } from "../src/generated/prisma/client";
 import { hashPassword } from "../src/utils/password.js";
-import mariadbAdapter from "./adapter";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 
-// 创建 MariaDB 适配器用于种子脚本
-const prisma = new PrismaClient({ adapter: mariadbAdapter });
+const adapter = new PrismaLibSql({
+  url: process.env.DATABASE_URL || "file:./dev.db",
+});
 
-/**
- * 种子数据脚本
- * 用于初始化数据库的基础数据
- */
+const prisma = new PrismaClient({ adapter });
+
 async function main() {
-  console.log("🌱 开始填充种子数据...");
+  console.log("开始填充种子数据...");
 
-  // 1. 创建角色数据
-  console.log("📝 创建角色数据...");
-
-  const adminRole = await prisma.role.upsert({
-    where: { name: "ADMIN" },
-    update: {},
-    create: {
-      name: "ADMIN",
-      description: "管理员角色，拥有所有权限",
-    },
-  });
-  console.log(`✅ 角色已创建/更新: ${adminRole.name} (ID: ${adminRole.id})`);
-
-  const userRole = await prisma.role.upsert({
-    where: { name: "USER" },
-    update: {},
-    create: {
-      name: "USER",
-      description: "普通用户角色，拥有基本权限",
-    },
-  });
-  console.log(`✅ 角色已创建/更新: ${userRole.name} (ID: ${userRole.id})`);
-
-  // 2. 创建示例用户（可选）
-  console.log("\n👤 创建示例用户...");
-
-  // 创建管理员用户
   const adminPassword = await hashPassword("admin123");
   const adminUser = await prisma.user.upsert({
-    where: { username: "admin123" },
+    where: { username: "admin" },
     update: {},
     create: {
-      username: "admin123",
+      username: "admin",
       password: adminPassword,
-      userRole: {
-        create: {
-          roleId: adminRole.id,
-        },
-      },
-    },
-    include: {
-      userRole: {
-        include: {
-          role: true,
-        },
-      },
     },
   });
-  console.log(
-    `✅ 管理员用户已创建/更新: ${adminUser.username} (角色: ${adminUser.userRole?.role.name})`
-  );
+  console.log(`管理员用户已创建: ${adminUser.username}`);
 
-  // 创建普通用户
-  const userPassword = await hashPassword("user123");
-  const normalUser = await prisma.user.upsert({
-    where: { username: "user123" },
-    update: {},
-    create: {
-      username: "user123",
-      password: userPassword,
-      userRole: {
-        create: {
-          roleId: userRole.id,
-        },
-      },
-    },
-    include: {
-      userRole: {
-        include: {
-          role: true,
-        },
-      },
-    },
-  });
-  console.log(
-    `✅ 普通用户已创建/更新: ${normalUser.username} (角色: ${normalUser.userRole?.role.name})`
-  );
-
-  // 创建测试用户
-  const testPassword = await hashPassword("test123");
-  const testUser = await prisma.user.upsert({
-    where: { username: "test123" },
-    update: {},
-    create: {
-      username: "test123",
-      password: testPassword,
-      userRole: {
-        create: {
-          roleId: userRole.id,
-        },
-      },
-    },
-    include: {
-      userRole: {
-        include: {
-          role: true,
-        },
-      },
-    },
-  });
-  console.log(
-    `✅ 测试用户已创建/更新: ${testUser.username} (角色: ${testUser.userRole?.role.name})`
-  );
-
-  console.log("\n✨ 种子数据填充完成！");
-  console.log("\n📋 默认账户信息：");
-  console.log("   管理员: admin123 / admin123");
-  console.log("   普通用户: user123 / user123");
-  console.log("   测试用户: test123 / test123");
-  console.log("\n⚠️  请在生产环境中修改默认密码！");
+  console.log("种子数据填充完成！");
+  console.log("默认账户: admin / admin123");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ 种子数据填充失败:", e);
+    console.error("种子数据填充失败:", e);
     process.exit(1);
   })
   .finally(async () => {

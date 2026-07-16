@@ -1,10 +1,6 @@
-import { Elysia } from "elysia";
-import { AuthModel } from "./model";
-import { response, responseSchema } from "@/utils/response";
-import { jwtPlugin } from "@/plugins/jwt";
-import { BusinessError, UserExistsError } from "../../common/errors";
-import { createUser } from "./service";
-import { getUserByUsername } from "../user/service";
+import { Elysia, t } from "elysia";
+import { jwtPlugin, requiredAuth } from "@/plugins/jwt";
+import { createUser, getUserByUsername, getUserList } from "./service";
 import { verifyPassword } from "@/utils/password";
 
 const auth = new Elysia({ prefix: "auth" }).use(jwtPlugin);
@@ -15,10 +11,10 @@ auth.post(
     const { username, password } = body;
 
     if (await getUserByUsername(username)) {
-      throw new UserExistsError();
+      throw new Error("用户已存在");
     }
     await createUser(username, password);
-    return response.success();
+    return { success: true };
   },
   {
     tags: ["授权"],
@@ -26,8 +22,10 @@ auth.post(
       summary: "注册",
       description: "用户注册接口",
     },
-    body: AuthModel.AccountBody,
-    response: responseSchema(),
+    body: t.Object({
+      username: t.String({ minLength: 3, maxLength: 20 }),
+      password: t.String({ minLength: 6, maxLength: 50 }),
+    }),
   }
 );
 
@@ -36,13 +34,12 @@ auth.post(
   async ({ jwt, body: { username, password } }) => {
     const user = await getUserByUsername(username);
     if (!user) {
-      throw new BusinessError(400, "用户名或密码错误");
+      throw new Error("用户名或密码错误");
     }
 
-    // 使用加密密码进行验证
     const isPasswordValid = await verifyPassword(password, user.password);
     if (!isPasswordValid) {
-      throw new BusinessError(400, "用户名或密码错误");
+      throw new Error("用户名或密码错误");
     }
 
     const token = await jwt.sign({
@@ -51,12 +48,7 @@ auth.post(
       exp: "30d",
     });
 
-    return response.success(
-      {
-        token,
-      },
-      "登录成功"
-    );
+    return { token };
   },
   {
     tags: ["授权"],
@@ -64,9 +56,33 @@ auth.post(
       summary: "登录",
       description: "用户登录授权接口",
     },
-    body: AuthModel.AccountBody,
-    response: responseSchema(AuthModel.signInResponse),
+    body: t.Object({
+      username: t.String({ minLength: 3, maxLength: 20 }),
+      password: t.String({ minLength: 6, maxLength: 50 }),
+    }),
   }
 );
 
-export default auth;
+const authWithGuard = new Elysia({ prefix: "auth" })
+  .use(requiredAuth)
+  .get(
+    "/users",
+    async ({ query }) => {
+      const page = Number(query.page) || 1;
+      const pageSize = Number(query.pageSize) || 10;
+      return getUserList(page, pageSize);
+    },
+    {
+      tags: ["授权"],
+      detail: {
+        summary: "用户列表",
+        description: "获取用户列表（需要认证）",
+      },
+      query: t.Object({
+        page: t.Optional(t.String({ pattern: "^[0-9]+$" })),
+        pageSize: t.Optional(t.String({ pattern: "^[0-9]+$" })),
+      }),
+    }
+  );
+
+export default [auth, authWithGuard];

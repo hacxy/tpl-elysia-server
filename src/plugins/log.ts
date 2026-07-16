@@ -24,9 +24,7 @@ export const logPlugin = (app: Elysia) => {
         customLogFormat:
           "🦊 {now} {level} {duration} {method} {pathname} {status} {message} {ip} {epoch}",
         logFilter: {
-          level: IS_PROD ? ["ERROR", "WARNING"] : ["INFO", "WARN", "ERROR"],
-          // status: [500, 404],
-          // method: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+          level: IS_PROD ? ["ERROR", "WARNING"] : ["INFO", "WARNING", "ERROR"],
         },
       },
     })
